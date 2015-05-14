@@ -26,6 +26,55 @@ new opat_PlayerVehicleID[MAX_PLAYERS],
 	opat_PlayerState[MAX_PLAYERS],
 	opat_VehicleInfoTrailer[MAX_VEHICLES];
 
+static
+	bool:opat_OPU = false,
+	bool:opat_OPSC = false,
+	bool:opat_OPC = false;
+
+#if defined FILTERSCRIPT
+
+public OnFilterScriptInit()
+{
+	opat_OPU = funcidx("opat_OnPlayerUpdate") != -1;
+	opat_OPSC = funcidx("opat_OnPlayerStateChange") != -1;
+	opat_OPC = funcidx("opat_OnPlayerConnect") != -1;
+	if(funcidx("opat_OnFilterScriptInit") != -1)
+		return CallLocalFunction("opat_OnFilterScriptInit", "");
+
+	return 1;
+}
+
+#if defined _ALS_OnFilterScriptInit
+    #undef OnFilterScriptInit
+#else
+    #define _ALS_OnFilterScriptInit
+#endif
+#define OnFilterScriptInit opat_OnFilterScriptInit
+forward opat_OnFilterScriptInit();
+
+#else
+
+public OnGameModeInit()
+{
+	opat_OPU = funcidx("opat_OnPlayerUpdate") != -1;
+	opat_OPSC = funcidx("opat_OnPlayerStateChange") != -1;
+	opat_OPC = funcidx("opat_OnPlayerConnect") != -1;
+	if(funcidx("opat_OnGameModeInit") != -1)
+		return CallLocalFunction("opat_OnGameModeInit", "");
+
+	return 1;
+}
+
+#if defined _ALS_OnGameModeInit
+    #undef OnGameModeInit
+#else
+    #define _ALS_OnGameModeInit
+#endif
+#define OnGameModeInit opat_OnGameModeInit
+forward opat_OnGameModeInit();
+
+#endif /* if defined FILTERSCRIPT */
+
 public OnPlayerUpdate(playerid) {
 	if(opat_PlayerVehicleID[playerid] != -1 && opat_PlayerState[playerid] == PLAYER_STATE_DRIVER) {
 		if(opat_VehicleInfoTrailer[ opat_PlayerVehicleID[playerid] ] == 0) {
@@ -40,6 +89,10 @@ public OnPlayerUpdate(playerid) {
 			}
 		}
 	}
+
+	if(opat_OPU == true)
+		return CallLocalFunction("opat_OnPlayerUpdate", "d", playerid);
+
 	return 1;
 }
 
@@ -49,7 +102,7 @@ public OnPlayerUpdate(playerid) {
     #define _ALS_OnPlayerUpdate
 #endif
 #define OnPlayerUpdate opat_OnPlayerUpdate
-forward opat_OnPlayerUpdate();
+forward opat_OnPlayerUpdate(playerid);
 
 public OnPlayerStateChange(playerid, newstate, oldstate) {
 	opat_PlayerState[playerid] = newstate;
@@ -65,6 +118,10 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
 			opat_PlayerVehicleID[playerid] = -1;
 		}
 	}
+
+	if(opat_OPSC == true)
+		return CallLocalFunction("opat_OnPlayerStateChange", "ddd", playerid, newstate, oldstate);
+
 	return 1;
 }
 
@@ -74,10 +131,14 @@ public OnPlayerStateChange(playerid, newstate, oldstate) {
     #define _ALS_OnPlayerStateChange
 #endif
 #define OnPlayerStateChange opat_OnPlayerStateChange
-forward opat_OnPlayerStateChange();
+forward opat_OnPlayerStateChange(playerid, newstate, oldstate);
 
 public OnPlayerConnect(playerid) {
 	opat_PlayerVehicleID[playerid] = -1;
+
+	if(opat_OPC == true)
+		return CallLocalFunction("opat_OnPlayerConnect", "d", playerid);
+
 	return 1;
 }
 
@@ -87,4 +148,4 @@ public OnPlayerConnect(playerid) {
     #define _ALS_OnPlayerConnect
 #endif
 #define OnPlayerConnect opat_OnPlayerConnect
-forward opat_OnPlayerConnect();
+forward opat_OnPlayerConnect(playerid);
