@@ -26,7 +26,7 @@ new opat_PlayerVehicleID[MAX_PLAYERS],
 	opat_PlayerState[MAX_PLAYERS],
 	opat_VehicleInfoTrailer[MAX_VEHICLES];
 
-stock opat_OnPlayerUpdate(playerid) {
+public OnPlayerUpdate(playerid) {
 	if(opat_PlayerVehicleID[playerid] != -1 && opat_PlayerState[playerid] == PLAYER_STATE_DRIVER) {
 		if(opat_VehicleInfoTrailer[ opat_PlayerVehicleID[playerid] ] == 0) {
 			if(GetVehicleTrailer(opat_PlayerVehicleID[playerid]) != 0) {
@@ -43,7 +43,15 @@ stock opat_OnPlayerUpdate(playerid) {
 	return 1;
 }
 
-stock opat_OnPlayerStateChange(playerid, newstate, oldstate) {
+#if defined _ALS_OnPlayerUpdate
+    #undef OnPlayerUpdate
+#else
+    #define _ALS_OnPlayerUpdate
+#endif
+#define OnPlayerUpdate opat_OnPlayerUpdate
+forward opat_OnPlayerUpdate();
+
+public OnPlayerStateChange(playerid, newstate, oldstate) {
 	opat_PlayerState[playerid] = newstate;
 	if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER) {
 		if(oldstate == PLAYER_STATE_ONFOOT) {
@@ -60,7 +68,23 @@ stock opat_OnPlayerStateChange(playerid, newstate, oldstate) {
 	return 1;
 }
 
-stock opat_OnPlayerConnect(playerid) {
+#if defined _ALS_OnPlayerStateChange
+    #undef OnPlayerStateChange
+#else
+    #define _ALS_OnPlayerStateChange
+#endif
+#define OnPlayerStateChange opat_OnPlayerStateChange
+forward opat_OnPlayerStateChange();
+
+public OnPlayerConnect(playerid) {
 	opat_PlayerVehicleID[playerid] = -1;
 	return 1;
 }
+
+#if defined _ALS_OnPlayerConnect
+    #undef OnPlayerConnect
+#else
+    #define _ALS_OnPlayerConnect
+#endif
+#define OnPlayerConnect opat_OnPlayerConnect
+forward opat_OnPlayerConnect();
